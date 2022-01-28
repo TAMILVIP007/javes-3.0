@@ -8,39 +8,37 @@ IN = os.environ.get("INLINE_MODE", None)
 if not IN:
  @javes05(outgoing=True, pattern="^!help(?: |$)(.*)")
  async def help(event):
-    args = event.pattern_match.group(1).lower()
-    if args:
-        if args in CMD_HELP:
-            await event.edit(str(CMD_HELP[args]))
-        else:
-            await event.edit("`Unknown module type !help to see all modules`")
-    else:
-        await event.edit(" For Support, Report bugs & help @errorsender_bot ")
-        string = (f"`Use !help <module_name>`\n\n**Currently Loaded [{len(CMD_HELP)}] Modules **\n")
-        for i in CMD_HELP:
-            string += "`" + str(i)
-            string += "`\n"
-        await event.reply(string)
+  if args := event.pattern_match.group(1).lower():
+   if args in CMD_HELP:
+       await event.edit(str(CMD_HELP[args]))
+   else:
+       await event.edit("`Unknown module type !help to see all modules`")
+  else:
+   await event.edit(" For Support, Report bugs & help @errorsender_bot ")
+   string = (f"`Use !help <module_name>`\n\n**Currently Loaded [{len(CMD_HELP)}] Modules **\n")
+   for i in CMD_HELP:
+       string += "`" + str(i)
+       string += "`\n"
+   await event.reply(string)
  
 
 
 
 
-@javes.on(rekcah05(pattern=f"help(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='help(?: |$)(.*)', allow_sudo=True))
 async def help(event):
-    args = event.pattern_match.group(1).lower()
-    if args:
-        if args in CMD_HELP:
-            await event.reply(str(CMD_HELP[args]))
-        else:
-            await event.reply("`Unknown module type !help to see all modules`")
-    else:
-        await event.reply(" For Support, Report bugs & help @errorsender_bot ")
-        string = (f"`Use .help <module_name>`\n\n**Currently Loaded [{len(CMD_HELP)}] Modules **\n")
-        for i in CMD_HELP:
-            string += "`" + str(i)
-            string += "`\n"
-        await event.reply(string)
+ if args := event.pattern_match.group(1).lower():
+  if args in CMD_HELP:
+      await event.reply(str(CMD_HELP[args]))
+  else:
+      await event.reply("`Unknown module type !help to see all modules`")
+ else:
+  await event.reply(" For Support, Report bugs & help @errorsender_bot ")
+  string = (f"`Use .help <module_name>`\n\n**Currently Loaded [{len(CMD_HELP)}] Modules **\n")
+  for i in CMD_HELP:
+      string += "`" + str(i)
+      string += "`\n"
+  await event.reply(string)
 
 
 

@@ -47,8 +47,7 @@ async def _(event):
         else:
             note_data += markdown_note[prev:to_check]
             prev = match.start(1) - 1
-    else:
-        note_data += markdown_note[prev:]
+    note_data += markdown_note[prev:]
     message_text = note_data.strip()
     tl_ib_buttons = build_keyboard(buttons)
     tgbot_reply_message = None
@@ -75,10 +74,8 @@ async def _(event):
 async def _(event):
     if event.fwd_from:
         return
-    reply_to_id = None
     catinput = "".join(event.text.split(maxsplit=1)[1:])
-    if event.reply_to_msg_id:
-        reply_to_id = event.reply_to_msg_id
+    reply_to_id = event.reply_to_msg_id or None
     await event.get_reply_message()
     await event.delete()
     if not catinput:

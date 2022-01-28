@@ -24,9 +24,7 @@ if not os.path.isdir("./temp"):
 async def _(cat):
     if cat.fwd_from:
         return
-    reply_to_id = cat.message.id
-    if cat.reply_to_msg_id:
-        reply_to_id = cat.reply_to_msg_id
+    reply_to_id = cat.reply_to_msg_id or cat.message.id
     event = await cat.edit("Converting.....")
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
@@ -58,9 +56,7 @@ async def _(cat):
 async def _(cat):
     if cat.fwd_from:
         return
-    reply_to_id = cat.message.id
-    if cat.reply_to_msg_id:
-        reply_to_id = cat.reply_to_msg_id
+    reply_to_id = cat.reply_to_msg_id or cat.message.id
     event = await cat.edit("Converting.....")
     if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
         os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)

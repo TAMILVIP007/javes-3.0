@@ -15,7 +15,7 @@ bot = "@MissRose_bot"
 async def _(event):
     if event.fwd_from:
         return
-    ok = await event.edit(f"**CHECKING**`...`")
+    ok = await event.edit('**CHECKING**`...`')
     if event.reply_to_msg_id:
         previous_message = await event.get_reply_message()
         sysarg = str(previous_message.sender_id)

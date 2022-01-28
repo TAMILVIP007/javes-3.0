@@ -11,14 +11,10 @@ from var import Var
 load_dotenv("config.env")
 from userbot.javes_main.heroku_var import config
 
-CONSOLE_LOGGER_VERBOSE = config.CONSOLE_LOGGER_VERBOSE
 basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=INFO)
 LOGS = getLogger(__name__)
 ENV = config.ENV
-API_KEY = config.API_KEY
-API_HASH = config.API_HASH
-STRING_SESSION = config.STRING_SESSION
 BOTLOG_CHATID = config.BOTLOG_CHATID
 BOTLOG = config.BOTLOG
 LOGSPAMMER = config.LOGSPAMMER
@@ -31,6 +27,7 @@ HEROKU_APIKEY = config.HEROKU_APIKEY
 HEROKU_API_KEY = config.HEROKU_API_KEY
 UPSTREAM_REPO_URL = config.UPSTREAM_REPO_URL
 TELEGRAPH_SHORT_NAME = config.TELEGRAPH_SHORT_NAME
+CONSOLE_LOGGER_VERBOSE = config.CONSOLE_LOGGER_VERBOSE
 CONSOLE_LOGGER_VERBOSE = config.CONSOLE_LOGGER_VERBOSE
 DB_URI = config.DB_URI
 OCR_SPACE_API_KEY = config.OCR_SPACE_API_KEY
@@ -66,17 +63,17 @@ TEMP_DOWNLOAD_DIRECTORY = config.TEMP_DOWNLOAD_DIRECTORY
 
 
 
-    
+
 from userbot import ALIVE_NAME
 from userbot import DEFAULTUSER
-JAVES_MSG = (f"Javes ")
+JAVES_MSG = 'Javes '
 ORI_MSG = (f"Hello Sir, I can't allow you to {ALIVE_NAME}'s PM without his permissions please be patient, Thankyou ")
 BLOCK_MSG = (f"I am not going to allow you to spam {DEFAULTUSER}'s PM, You have been blocked ")
 JAVES_NNAME = str(JAVES_NAME) if JAVES_NAME else str(JAVES_MSG)
 AFK_MSG = (f"Hello Sir, {DEFAULTUSER} is offline Just leave Your message, Thankyou!")
 BIO_MSG = (f"")
-ALIVE_S_MSG = (f"Iam Alive!")
-ALIVE_E_MSG = (f"Databases functioning normally!! ")
+ALIVE_S_MSG = 'Iam Alive!'
+ALIVE_E_MSG = 'Databases functioning normally!! '
 
 if not os.path.exists('bin'):
     os.mkdir('bin')
@@ -93,10 +90,12 @@ S3 = os.environ.get("S3", None)
 BOT_TOKEN = os.environ.get("BOT_TOKEN", None)
 
 client2 = client3 = tebot = None
-if STRING_SESSION:
+API_KEY = config.API_KEY
+API_HASH = config.API_HASH
+if STRING_SESSION := config.STRING_SESSION:
     client = TelegramClient(StringSession(STRING_SESSION),API_KEY,API_HASH,connection_retries=None,auto_reconnect=False,lang_code='en')
 else:
-     quit(1)
+    quit(1)
 if S2:
     client2 = TelegramClient(StringSession(S2),API_KEY,API_HASH,connection_retries=None,auto_reconnect=False,lang_code='en')
 if S3:

@@ -13,12 +13,12 @@ async def _(event):
     if event.fwd_from:
         return
     animation_interval = 1
-    animation_ttl = range(0,80)
+    animation_ttl = range(80)
     await event.edit("😊𝓜𝓔𝓡𝓡𝓨 𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢😁")
     animation_chars = ["💖𝓜𝓔𝓡𝓡𝓨💖𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢💖","💙𝓜𝓔𝓡𝓡𝓨💙𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢💙","❤️𝓜𝓔𝓡𝓡𝓨♥️𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢❤️","💚𝓜𝓔𝓡𝓡𝓨💚𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢💚","💜𝓜𝓔𝓡𝓡𝓨💜𝓒𝓗𝓡𝓘𝓢𝓣𝓜𝓐𝓢💜",]
 
     for i in animation_ttl:
-        	
+
         await asyncio.sleep(animation_interval)
         await event.edit(animation_chars[i % 5])
 @javes.on(admin_cmd("wish"))

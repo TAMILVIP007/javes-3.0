@@ -24,60 +24,56 @@ from userbot import CMD_HELP
 
 @client.on(events.MessageDeleted)
 async def handler(event):
-  if event.is_private: 
-   if DP: 
-       await client.send_message(event.chat_id, f'User  Deleted His message just now !! \n **Event Details ** \n {event}')                 
-  if not event.is_private: 
-    if DG : 
-       await client.send_message(event.chat_id, f'User  Deleted His message just now !! \n **Event Details ** \n {event}')
+  if event.is_private and DP:
+    await client.send_message(event.chat_id, f'User  Deleted His message just now !! \n **Event Details ** \n {event}')
+  if not event.is_private and DG:
+    await client.send_message(event.chat_id, f'User  Deleted His message just now !! \n **Event Details ** \n {event}')
        
 
 
        
 @client.on(events.MessageEdited)
 async def handler(event):
-  if event.is_private: 
-   if EP : 
-       me = await event.client.get_me()
-       date = event.date
-       id = event.from_id
-       hide = event.edit_hide
-       mentioned = event.mentioned
-       silent = event.silent
-       scheduled = event.from_scheduled
-       editdate = event.edit_date
-       editprot = event.media_unread       
-       if event.from_id == me.id:
-           return       
-       return await event.reply(
-                     f"`{JAVES_NNAME}:` **User  Edited His message !!** \n"                      
-                     f"**date**: `{date}`\n"                   
-                     f"**Edited date **  : `{editdate}`\n"
-                     f"**Silent message **  : `{silent}`\n"
-                     f"**scheduled message **  : `{scheduled}`\n"
-                     f"**mentioned**  : `{mentioned}`\n"
-                     f"**userid**  : `{id}`\n")   
-  if not event.is_private: 
-    if EG : 
-       me = await event.client.get_me()
-       date = event.date
-       id = event.from_id
-       hide = event.edit_hide
-       mentioned = event.mentioned
-       silent = event.silent
-       scheduled = event.from_scheduled
-       editdate = event.edit_date
-       editprot = event.media_unread       
-       if event.from_id == me.id:
-           return       
-       return await event.reply(
-                     f"`{JAVES_NNAME}:` **User  Edited His message !!** \n"                      
-                     f"**date**: `{date}`\n"                   
-                     f"**Edited date **  : `{editdate}`\n"
-                     f"**Silent message **  : `{silent}`\n"
-                     f"**scheduled message **  : `{scheduled}`\n"
-                     f"**mentioned**  : `{mentioned}`\n"
-                     f"**userid**  : `{id}`\n")   
+  if event.is_private and EP:
+    me = await event.client.get_me()
+    date = event.date
+    id = event.from_id
+    hide = event.edit_hide
+    mentioned = event.mentioned
+    silent = event.silent
+    scheduled = event.from_scheduled
+    editdate = event.edit_date
+    editprot = event.media_unread
+    if event.from_id == me.id:
+        return
+    return await event.reply(
+                  f"`{JAVES_NNAME}:` **User  Edited His message !!** \n"                      
+                  f"**date**: `{date}`\n"                   
+                  f"**Edited date **  : `{editdate}`\n"
+                  f"**Silent message **  : `{silent}`\n"
+                  f"**scheduled message **  : `{scheduled}`\n"
+                  f"**mentioned**  : `{mentioned}`\n"
+                  f"**userid**  : `{id}`\n")
+  if not event.is_private and EG:
+    me = await event.client.get_me()
+    date = event.date
+    id = event.from_id
+    hide = event.edit_hide
+    mentioned = event.mentioned
+    silent = event.silent
+    scheduled = event.from_scheduled
+    editdate = event.edit_date
+    editprot = event.media_unread
+    if event.from_id == me.id:
+        return
+    return await event.reply(
+                  f"`{JAVES_NNAME}:` **User  Edited His message !!** \n"                      
+                  f"**date**: `{date}`\n"                   
+                  f"**Edited date **  : `{editdate}`\n"
+                  f"**Silent message **  : `{silent}`\n"
+                  f"**scheduled message **  : `{scheduled}`\n"
+                  f"**mentioned**  : `{mentioned}`\n"
+                  f"**userid**  : `{id}`\n")   
        
 
 
@@ -85,15 +81,16 @@ async def handler(event):
 
 @client.on(events.ChatAction)
 async def handler(rkG):
-    if rkG.user_left:
-    	if LG:   
-           guser = await rkG.get_user() ; chat = await rkG.get_chat() ; admin = chat.admin_rights
-           creator = chat.creator   
-           if admin or creator:
-                await client.edit_permissions(rkG.chat_id, guser.id, view_messages=False)  
-                return await rkG.reply(
-                     f"`{JAVES_NNAME}:` ** User left the group and permanently banned!!** \n"                      
-                     f"`Victim Id`: **[{guser.id}](tg://user?id={guser.id})**")  
+  if rkG.user_left and LG:
+    guser = await rkG.get_user()
+    chat = await rkG.get_chat()
+    admin = chat.admin_rights
+    creator = chat.creator
+    if admin or creator:
+         await client.edit_permissions(rkG.chat_id, guser.id, view_messages=False)  
+         return await rkG.reply(
+              f"`{JAVES_NNAME}:` ** User left the group and permanently banned!!** \n"                      
+              f"`Victim Id`: **[{guser.id}](tg://user?id={guser.id})**")  
 
 
     

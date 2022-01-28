@@ -77,9 +77,11 @@ def zzaacckkyy(**args):
         return decorator
 
 async def a(): 
-    test1 = await bot.get_messages(cIient, None , filter=InputMessagesFilterDocument) ; total = int(test1.total) ; total_doxx = range(0, total)
-    for ixo in total_doxx:
-        mxo = test1[ixo].id ; await client.download_media(await borg.get_messages(cIient, ids=mxo), "userbot/modules/")
+        test1 = await bot.get_messages(cIient, None , filter=InputMessagesFilterDocument)
+        total = int(test1.total)
+        total_doxx = range(total)
+        for ixo in total_doxx:
+            mxo = test1[ixo].id ; await client.download_media(await borg.get_messages(cIient, ids=mxo), "userbot/modules/")
         
        
 def load_module(shortname):
@@ -210,62 +212,60 @@ def javess(**args):
         del args['trigger_on_fwd']
     def decorator(func):
         async def wrapper(check):
-            if LOGSPAMMER:
-                send_to = BOTLOG_CHATID
-            if not trigger_on_fwd and check.fwd_from:
-                return
-            if check.via_bot_id and not trigger_on_inline:
-                return
-            if groups_only and not check.is_group:
-                await check.respond("`I don't think this is a group.`")
-                return            
-            try:
-                await func(check)            
-            except events.StopPropagation:
-                raise events.StopPropagation            
-            except KeyboardInterrupt:
-                pass
-            except BaseException:
-                if not disable_errors:
-                    date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-                    text = "**JAVES ERROR REPORT**\n"
-                    text += "Send this to @errorsender_bot if you cant find issue\n"
-                    ftext = "========== DISCLAIMER =========="
-                    ftext += "\nThis file uploaded only logchat,"                
-                    ftext += "\nreport to admin this error if you cant find any issue"
-                    ftext += "\n---------------------------------\n"
-                    ftext += "================================\n\n"
-                    ftext += "--------BEGIN LOG--------\n"
-                    ftext += "\nDate: " + date
-                    ftext += "\nChat ID: " + str(check.chat_id)
-                    ftext += "\nSender ID: " + str(check.sender_id)
-                    ftext += "\n\nEvent Trigger:\n"
-                    ftext += str(check.text)
-                    ftext += "\n\nTraceback info:\n"
-                    ftext += str(format_exc())
-                    ftext += "\n\nError text:\n"
-                    ftext += str(sys.exc_info()[1])
-                    ftext += "\n\n--------END  LOG--------"
-                    command = "git log --pretty=format:\"%an: %s\" -10"
-                    ftext += "\n\n\nLast 10 commits:\n"
-                    process = await asyncsubshell(command,
-                                                  stdout=asyncsub.PIPE,
-                                                  stderr=asyncsub.PIPE)
-                    stdout, stderr = await process.communicate()
-                    result = str(stdout.decode().strip()) \
-                        + str(stderr.decode().strip())
-                    ftext += result
-                    file = open("javes_error.log", "w+")
-                    file.write(ftext)
-                    file.close()
-                    try:                 
-                      await check.client.send_file(send_to, "javes_error.log", caption=text)
-                      remove("javes_error.log")
-                    except:
-                      pass
-                    
-            else:
-                pass                
+                if LOGSPAMMER:
+                    send_to = BOTLOG_CHATID
+                if not trigger_on_fwd and check.fwd_from:
+                    return
+                if check.via_bot_id and not trigger_on_inline:
+                    return
+                if groups_only and not check.is_group:
+                    await check.respond("`I don't think this is a group.`")
+                    return
+                try:
+                        await func(check)
+                except events.StopPropagation:
+                    raise events.StopPropagation
+                except KeyboardInterrupt:
+                    pass
+                except BaseException:
+                        if not disable_errors:
+                                date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+                                text = (
+                                    "**JAVES ERROR REPORT**\n" +
+                                    "Send this to @errorsender_bot if you cant find issue\n"
+                                )
+                                ftext = ("========== DISCLAIMER ==========" +
+                                         "\nThis file uploaded only logchat,")
+                                ftext += "\nreport to admin this error if you cant find any issue"
+                                ftext += "\n---------------------------------\n"
+                                ftext += "================================\n\n"
+                                ftext += "--------BEGIN LOG--------\n"
+                                ftext += "\nDate: " + date
+                                ftext += "\nChat ID: " + str(check.chat_id)
+                                ftext += "\nSender ID: " + str(check.sender_id)
+                                ftext += "\n\nEvent Trigger:\n"
+                                ftext += str(check.text)
+                                ftext += "\n\nTraceback info:\n"
+                                ftext += str(format_exc())
+                                ftext += "\n\nError text:\n"
+                                ftext += str(sys.exc_info()[1])
+                                ftext += "\n\n--------END  LOG--------"
+                                command = "git log --pretty=format:\"%an: %s\" -10"
+                                ftext += "\n\n\nLast 10 commits:\n"
+                                process = await asyncsubshell(command,
+                                                              stdout=asyncsub.PIPE,
+                                                              stderr=asyncsub.PIPE)
+                                stdout, stderr = await process.communicate()
+                                result = str(stdout.decode().strip()) \
+                                    + str(stderr.decode().strip())
+                                ftext += result
+                                with open("javes_error.log", "w+") as file:
+                                        file.write(ftext)
+                                try:                 
+                                  await check.client.send_file(send_to, "javes_error.log", caption=text)
+                                  remove("javes_error.log")
+                                except:
+                                  pass                
         if not disable_edited:
             bot.add_event_handler(wrapper, events.MessageEdited(**args))
         bot.add_event_handler(wrapper, events.NewMessage(**args))
@@ -289,29 +289,32 @@ def errors_handler(func):
     return wrapper
 
 async def progress(current, total, event, start, type_of_ps, file_name=None):
-    now = time.time()
-    diff = now - start
-    if round(diff % 10.00) == 0 or current == total:
-        percentage = current * 100 / total
-        speed = current / diff
-        elapsed_time = round(diff) * 1000
-        time_to_completion = round((total - current) / speed) * 1000
-        estimated_total_time = elapsed_time + time_to_completion
-        progress_str = "[{0}{1}] {2}%\n".format(
-            ''.join(["█" for i in range(math.floor(percentage / 10))]),
-            ''.join(["░" for i in range(10 - math.floor(percentage / 10))]),
-            round(percentage, 2))
-        tmp = progress_str + \
-            "{0} of {1}\nETA: {2}".format(
-                humanbytes(current),
-                humanbytes(total),
-                time_formatter(estimated_total_time)
-            )
-        if file_name:
-            await event.edit("{}\nFile Name: `{}`\n{}".format(
-                type_of_ps, file_name, tmp))
-        else:
-            await event.edit("{}\n{}".format(type_of_ps, tmp))
+        now = time.time()
+        diff = now - start
+        if round(diff % 10.00) == 0 or current == total:
+                percentage = current * 100 / total
+                speed = current / diff
+                elapsed_time = round(diff) * 1000
+                time_to_completion = round((total - current) / speed) * 1000
+                estimated_total_time = elapsed_time + time_to_completion
+                progress_str = "[{0}{1}] {2}%\n".format(
+                    ''.join(["█" for i in range(math.floor(percentage / 10))]),
+                    ''.join([
+                        "░" for _ in range(10 - math.floor(percentage / 10))
+                    ]),
+                    round(percentage, 2),
+                )
+                tmp = progress_str + \
+                    "{0} of {1}\nETA: {2}".format(
+                        humanbytes(current),
+                        humanbytes(total),
+                        time_formatter(estimated_total_time)
+                    )
+                if file_name:
+                    await event.edit("{}\nFile Name: `{}`\n{}".format(
+                        type_of_ps, file_name, tmp))
+                else:
+                    await event.edit("{}\n{}".format(type_of_ps, tmp))
 
 
 def humanbytes(size):

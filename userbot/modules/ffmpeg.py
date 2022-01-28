@@ -20,27 +20,25 @@ async def reply_id(event):
 FF_MPEG_DOWN_LOAD_MEDIA_PATH = "./downloads/javes3.media.ffmpeg"
 def media_type(message):
     if message and message.photo:
-        media = "Photo"
+        return "Photo"
     elif message and message.audio:
-        media = "Audio"
+        return "Audio"
     elif message and message.voice:
-        media = "Voice"
+        return "Voice"
     elif message and message.video_note:
-        media = "Round Video"
+        return "Round Video"
     elif message and message.gif:
-        media = "Gif"
+        return "Gif"
     elif message and message.sticker:
-        media = "Sticker"
+        return "Sticker"
     elif message and message.video:
-        media = "Video"
+        return "Video"
     elif message and message.document:
-        media = "Document"
+        return "Document"
     else:
-        media = None
-    return media
+        return None
 
 @bot.on(admin_cmd(pattern="ffmpegsave$"))
-
 async def ff_mpeg_trim_cmd(event):
     if event.fwd_from:
         return
@@ -73,12 +71,11 @@ async def ff_mpeg_trim_cmd(event):
             await event.edit( "`Reply to a any media file`")
     else:
         await event.edit(
-            f"A media file already exists in path. Please remove the media and try again!\n`.ffmpegclear`",
+            'A media file already exists in path. Please remove the media and try again!\n`.ffmpegclear`'
         )
 
 
 @bot.on(admin_cmd(pattern="vtrim"))
-
 async def ff_mpeg_trim_cmd(event):
     if event.fwd_from:
         return
@@ -127,8 +124,7 @@ async def ff_mpeg_trim_cmd(event):
             FF_MPEG_DOWN_LOAD_MEDIA_PATH, Config.TMP_DOWNLOAD_DIRECTORY, start_time
         )
         if o is None:
-            return await catevent.edit( f"**Error : **`Can't complete the process`"
-            )
+            return await catevent.edit("**Error : **`Can't complete the process`")
         try:
             c_time = time.time()
             await event.client.send_file(
@@ -155,7 +151,6 @@ async def ff_mpeg_trim_cmd(event):
 
 
 @bot.on(admin_cmd(pattern="atrim"))
-
 async def ff_mpeg_trim_cmd(event):
     if event.fwd_from:
         return
@@ -170,8 +165,9 @@ async def ff_mpeg_trim_cmd(event):
     cmt = current_message_text.split(" ")
     start = datetime.now()
     out_put_file_name = os.path.join(
-        Config.TMP_DOWNLOAD_DIRECTORY, f"{str(round(time.time()))}.mp3"
+        Config.TMP_DOWNLOAD_DIRECTORY, f'{round(time.time())}.mp3'
     )
+
     if len(cmt) == 3:
         # output should be audio
         cmd, start_time, end_time = cmt
@@ -183,8 +179,7 @@ async def ff_mpeg_trim_cmd(event):
             out_put_file_name,
         )
         if o is None:
-            return await catevent.edit( f"**Error : **`Can't complete the process`"
-            )
+            return await catevent.edit("**Error : **`Can't complete the process`")
         try:
             c_time = time.time()
             await event.client.send_file(
@@ -227,7 +222,7 @@ async def ff_mpeg_trim_cmd(event):
 
 async def take_screen_shot(video_file, output_directory, ttl):
     # https://stackoverflow.com/a/13891070/4723940
-    out_put_file_name = os.path.join(output_directory, f"{str(time.time())}.jpg")
+    out_put_file_name = os.path.join(output_directory, f'{time.time()}.jpg')
     file_genertor_command = [
         "ffmpeg",
         "-ss",
@@ -260,8 +255,9 @@ async def cult_small_video(
 ):
     # https://stackoverflow.com/a/13891070/4723940
     out_put_file_name = out_put_file_name or os.path.join(
-        output_directory, f"{str(round(time.time()))}.mp4"
+        output_directory, f'{round(time.time())}.mp4'
     )
+
     file_genertor_command = [
         "ffmpeg",
         "-i",

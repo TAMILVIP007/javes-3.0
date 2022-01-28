@@ -31,9 +31,11 @@ def is_message_image(message):
     if message.media:
         if isinstance(message.media, MessageMediaPhoto):
             return True
-        if message.media.document:
-            if message.media.document.mime_type.split("/")[0] == "image":
-                return True
+        if (
+            message.media.document
+            and message.media.document.mime_type.split("/")[0] == "image"
+        ):
+            return True
         return False
     return False
     
@@ -66,87 +68,89 @@ def deEmojify(inputString: str) -> str:
 
 
 
-@javes.on(rekcah05(pattern=f"song2(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='song2(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!song2(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:
-    reply_message = event.pattern_match.group(1)
-    if not reply_message:
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if reply_message.media:
-       	    return await rkp.edit("`Reply to a text message`")
-    if not reply_message:
-          return await rkp.edit("`Error\n**Usage** song2 <song> or reply to a message`")
-    chat = "@vkmusic_bot"   
-    async with event.client.conversation(chat, timeout=7) as conv:
-          try:                   
-              await conv.send_message(reply_message)
-              response = await conv.get_response()
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @iLyricsBot and try again`")
-              return
-          try:
-           await response.click(1, 1) 
-          except:
-             return await rkp.edit(f"`Failed to find {reply_message}`")    
-          test = await conv.get_response()
-          await rkp.delete()
-          await event.client.send_file(event.chat_id, test, caption=f"`{reply_message} song`", reply_to=event.message.reply_to_msg_id)          
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = event.pattern_match.group(1)
+        if not reply_message:
+            reply_message = await event.get_reply_message()
+            if reply_message and reply_message.media:
+                return await rkp.edit("`Reply to a text message`")
+        if not reply_message:
+              return await rkp.edit("`Error\n**Usage** song2 <song> or reply to a message`")
+        chat = "@vkmusic_bot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+              try:                   
+                  await conv.send_message(reply_message)
+                  response = await conv.get_response()
+              except YouBlockedUserError: 
+                  await rkp.edit("`Please unblock @iLyricsBot and try again`")
+                  return
+              try:
+               await response.click(1, 1) 
+              except:
+                 return await rkp.edit(f"`Failed to find {reply_message}`")    
+              test = await conv.get_response()
+              await rkp.delete()
+              await event.client.send_file(event.chat_id, test, caption=f"`{reply_message} song`", reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
-@javes.on(rekcah05(pattern=f"history(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='history(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!history(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:
-    name = username = [] ; reply_message = await event.get_reply_message() 
-    if not event.reply_to_msg_id or reply_message.media:
-       return await rkp.edit("`reply to a user text message`")
-    chat = "@SangMataInfo_bot"   
-    async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=461843263))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @sangmatainfo_bot and try again`")
-              return
-          if response.text.startswith("Forward"):
-             return await rkp.edit("`Privacy error!`")              
-          if response.text.startswith("🔗"):
-          	return await rkp.edit("`No name/username history for this user`")   
-          if response.text.startswith("Name"):
-              name = response.text
-              await rkp.edit(f"` Got name history Trying to get username history....` ")
-          test = conv.wait_event(events.NewMessage(incoming=True,from_users=461843263))         
-          response = await test
-          if response.text.startswith("Username"):
-               username = response.text
-               await rkp.edit("` Got username history Trying to give full results....` ")
-          return await rkp.edit(f"**User History**\n\n{name}\n\n{username}")
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        name = username = []
+        reply_message = await event.get_reply_message()
+        if not event.reply_to_msg_id or reply_message.media:
+           return await rkp.edit("`reply to a user text message`")
+        chat = "@SangMataInfo_bot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+            try:     
+                test = conv.wait_event(events.NewMessage(incoming=True,from_users=461843263))
+                await event.client.forward_messages(chat, reply_message)
+                response = await test
+            except YouBlockedUserError: 
+                await rkp.edit("`Please unblock @sangmatainfo_bot and try again`")
+                return
+            if response.text.startswith("Forward"):
+               return await rkp.edit("`Privacy error!`")
+            if response.text.startswith("🔗"):
+            	return await rkp.edit("`No name/username history for this user`")
+            if response.text.startswith("Name"):
+                name = response.text
+                await rkp.edit('` Got name history Trying to get username history....` ')
+            test = conv.wait_event(events.NewMessage(incoming=True,from_users=461843263))
+            response = await test
+            if response.text.startswith("Username"):
+                 username = response.text
+                 await rkp.edit("` Got username history Trying to give full results....` ")
+            return await rkp.edit(f"**User History**\n\n{name}\n\n{username}")
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
-@javes.on(rekcah05(pattern=f"ag(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='ag(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!ag(?: |$)(.*)")
 async def ag(animu):
     try:
@@ -163,39 +167,42 @@ async def ag(animu):
     animus = [20, 32, 33, 40, 41, 42, 58]
     sticcers = await bot.inline_query(
         "stickerizerbot", f"#{random.choice(animus)}{(deEmojify(text))}")
-    await sticcers[0].click(animu.chat_id,
-                            reply_to=animu.reply_to_msg_id,
-                            silent=True if animu.is_reply else False,
-                            hide_via=True)
+    await sticcers[0].click(
+        animu.chat_id,
+        reply_to=animu.reply_to_msg_id,
+        silent=bool(animu.is_reply),
+        hide_via=True,
+    )
     
 
 
-@javes.on(rekcah05(pattern=f"info(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='info(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!info(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:
-    reply_message = await event.get_reply_message() 
-    if not event.reply_to_msg_id:
-       return await rkp.edit("`reply to a user  message`")
-    chat = "@getidsbot"   
-    async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=186675376))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-                return await rkp.edit("`Please unblock @getidsbot_bot and try again`")
-          return await rkp.edit(f"**Info**\n\n{response.text}")
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+      reply_message = await event.get_reply_message() 
+      if not event.reply_to_msg_id:
+         return await rkp.edit("`reply to a user  message`")
+      chat = "@getidsbot"   
+      async with event.client.conversation(chat, timeout=7) as conv:
+            try:     
+                test = conv.wait_event(events.NewMessage(incoming=True,from_users=186675376))
+                await event.client.forward_messages(chat, reply_message)
+                response = await test
+            except YouBlockedUserError: 
+                  return await rkp.edit("`Please unblock @getidsbot_bot and try again`")
+            return await rkp.edit(f"**Info**\n\n{response.text}")
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
@@ -206,285 +213,285 @@ async def _(event):
 
 
 
-@javes.on(rekcah05(pattern=f"lyrics2(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='lyrics2(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!lyrics2(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:
-    reply_message = event.pattern_match.group(1)
-    if not reply_message:
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if reply_message.media:
-       	    return await rkp.edit("`Reply to a text message`")
-    if not reply_message:
-          return await rkp.edit("`Error\n**Usage** lyrics2 <song> or reply to a message`")
-    chat = "@iLyricsBot"   
-    async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.MessageEdited(incoming=True,from_users=232268607))
-              await event.client.send_message(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @iLyricsBot and try again`")
-              return          
-          return await rkp.edit(response.text)          
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = event.pattern_match.group(1)
+        if not reply_message:
+            reply_message = await event.get_reply_message()
+            if reply_message and reply_message.media:
+                return await rkp.edit("`Reply to a text message`")
+        if not reply_message:
+              return await rkp.edit("`Error\n**Usage** lyrics2 <song> or reply to a message`")
+        chat = "@iLyricsBot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+              try:     
+                  test = conv.wait_event(events.MessageEdited(incoming=True,from_users=232268607))
+                  await event.client.send_message(chat, reply_message)
+                  response = await test
+              except YouBlockedUserError: 
+                  await rkp.edit("`Please unblock @iLyricsBot and try again`")
+                  return          
+              return await rkp.edit(response.text)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
-@javes.on(rekcah05(pattern=f"fry(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='fry(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!fry(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo/sticker`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** fry  reply to a non animated sticker / photo")
-       chat = "@image_deepfrybot"   
-       async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=432858024))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @image_deepfrybot and try again`")
-              return
-          await rkp.delete()
-          return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)     
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo/sticker`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** fry  reply to a non animated sticker / photo")
+        chat = "@image_deepfrybot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=432858024))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+           except YouBlockedUserError: 
+               await rkp.edit("`Please unblock @image_deepfrybot and try again`")
+               return
+           await rkp.delete()
+           return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
 
 
 
-@javes.on(rekcah05(pattern=f"ss2(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='ss2(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!ss2(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
-       chat = "@BuildStickerBot"   
-       async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=164977173))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              return await rkp.edit("`Please unblock @BuildStickerBot and try again`")
-          if response.text.startswith("🔸"):   
-              return  await rkp.edit("`Failed to convert`")
-          await rkp.delete()
-          return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)     
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
+        chat = "@BuildStickerBot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=164977173))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+           except YouBlockedUserError: 
+               return await rkp.edit("`Please unblock @BuildStickerBot and try again`")
+           if response.text.startswith("🔸"):   
+               return  await rkp.edit("`Failed to convert`")
+           await rkp.delete()
+           return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
 
-@javes.on(rekcah05(pattern=f"info2(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='info2(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!info2(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** read2 reply to a  photo")
-       chat = "@Rekognition_Bot"   
-       async with event.client.conversation(chat, timeout=15) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=461083923))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=461083923))
-              response = await test
-          except YouBlockedUserError: 
-              return await rkp.edit("`Please unblock @Rekognition_Bot and try again`")
-          if response.text.startswith("Send"):   
-              return  await rkp.edit("`Failed to read`")
-          return await rkp.edit(response.text)
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** read2 reply to a  photo")
+        chat = "@Rekognition_Bot"
+        async with event.client.conversation(chat, timeout=15) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=461083923))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=461083923))
+               response = await test
+           except YouBlockedUserError: 
+               return await rkp.edit("`Please unblock @Rekognition_Bot and try again`")
+           if response.text.startswith("Send"):   
+               return  await rkp.edit("`Failed to read`")
+           return await rkp.edit(response.text)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
-@javes.on(rekcah05(pattern=f"ss3(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='ss3(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!ss3(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
-       chat = "@Stickerdownloadbot"   
-       async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=220255550))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              return await rkp.edit("`Please unblock @Stickerdownloadbot and try again`")
-          if response.text.startswith("I"):   
-              return  await rkp.edit("`Failed to convert`")
-          await rkp.delete()
-          return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)     
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
+        chat = "@Stickerdownloadbot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=220255550))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+           except YouBlockedUserError: 
+               return await rkp.edit("`Please unblock @Stickerdownloadbot and try again`")
+           if response.text.startswith("I"):   
+               return  await rkp.edit("`Failed to convert`")
+           await rkp.delete()
+           return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
 
-@javes.on(rekcah05(pattern=f"ss4(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='ss4(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!ss4(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
-       chat = "@stickerator_bot"   
-       async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=384614990))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              return await rkp.edit("`Please unblock @stickerator_bot and try again`")
-          if response.text.startswith("274"):   
-              return  await rkp.edit("`Failed to convert`")
-          await rkp.delete()
-          return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)     
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** ss2 reply to a  photo")
+        chat = "@stickerator_bot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=384614990))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+           except YouBlockedUserError: 
+               return await rkp.edit("`Please unblock @stickerator_bot and try again`")
+           if response.text.startswith("274"):   
+               return  await rkp.edit("`Failed to convert`")
+           await rkp.delete()
+           return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 
           
 
-@javes.on(rekcah05(pattern=f"mask(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='mask(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!mask(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:    
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if not reply_message.media:
-       	    return await rkp.edit("`Reply to a photo/sticker`")
-       if not reply_message:
-          return await rkp.edit("**Error**\n**Usage** fry  reply to a non animated sticker / photo")
-       chat = "@hazmat_suit_bot"   
-       async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=905164246))
-              await event.client.forward_messages(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @hazmat_suit_bot and try again`")
-              return
-          await rkp.delete()
-          return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)     
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = await event.get_reply_message()
+        if reply_message and not reply_message.media:
+            return await rkp.edit("`Reply to a photo/sticker`")
+        if not reply_message:
+           return await rkp.edit("**Error**\n**Usage** fry  reply to a non animated sticker / photo")
+        chat = "@hazmat_suit_bot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+           try:     
+               test = conv.wait_event(events.NewMessage(incoming=True,from_users=905164246))
+               await event.client.forward_messages(chat, reply_message)
+               response = await test
+           except YouBlockedUserError: 
+               await rkp.edit("`Please unblock @hazmat_suit_bot and try again`")
+               return
+           await rkp.delete()
+           return await event.client.send_file(event.chat_id, response.message.media, reply_to=event.message.reply_to_msg_id)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
-@javes.on(rekcah05(pattern=f"ushort(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='ushort(?: |$)(.*)', allow_sudo=True))
 @javes05(outgoing=True, pattern="^!ushort(?: |$)(.*)")
 async def _(event):
-  sender = await event.get_sender() ; me = await event.client.get_me()
-  if not sender.id == me.id:
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if sender.id != me.id:
         rkp = await event.reply("`processing...`")
-  else:
-    	rkp = await event.edit("`processing...`")    
-  try:
-    reply_message = event.pattern_match.group(1)
-    if not reply_message:
-       reply_message = await event.get_reply_message() 
-       if reply_message:
-           if reply_message.media:
-       	    return await rkp.edit("`Reply to a link`")
-    if not reply_message:
-          return await rkp.edit("`Error\n**Usage** ushort <link> or reply to a link`")
-    chat = "@LinkGeneratorBot"   
-    async with event.client.conversation(chat, timeout=7) as conv:
-          try:     
-              test = conv.wait_event(events.NewMessage(incoming=True,from_users=355705793))
-              await event.client.send_message(chat, reply_message)
-              response = await test
-          except YouBlockedUserError: 
-              await rkp.edit("`Please unblock @LinkGeneratorBot and try again`")
-              return          
-          return await rkp.edit(response.text)          
-  except Exception as e:
-        error = str(e)
-        if not error:
-            error = f"No response from {chat}"
-        return await rkp.edit(f"**Error**\n\n{error}")
+    else:
+        rkp = await event.edit("`processing...`")
+    try:
+        reply_message = event.pattern_match.group(1)
+        if not reply_message:
+            reply_message = await event.get_reply_message()
+            if reply_message and reply_message.media:
+                return await rkp.edit("`Reply to a link`")
+        if not reply_message:
+              return await rkp.edit("`Error\n**Usage** ushort <link> or reply to a link`")
+        chat = "@LinkGeneratorBot"
+        async with event.client.conversation(chat, timeout=7) as conv:
+              try:     
+                  test = conv.wait_event(events.NewMessage(incoming=True,from_users=355705793))
+                  await event.client.send_message(chat, reply_message)
+                  response = await test
+              except YouBlockedUserError: 
+                  await rkp.edit("`Please unblock @LinkGeneratorBot and try again`")
+                  return          
+              return await rkp.edit(response.text)
+    except Exception as e:
+          error = str(e)
+          if not error:
+              error = f"No response from {chat}"
+          return await rkp.edit(f"**Error**\n\n{error}")
           
 
 

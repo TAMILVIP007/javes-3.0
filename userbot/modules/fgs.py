@@ -29,7 +29,7 @@ async def gcs(event):
         text1, text2 = text.split(".")
     else:
         await event.edit("`What should i do wth blank message use .gsrch search.reasult`")
-    await event.edit(f"`Requesting to google...`")
+    await event.edit('`Requesting to google...`')
     img = await fakegs(text1, text2)
     await event.delete()
     await event.client.send_file(event.chat_id, img, reply_to=reply_to_id)

@@ -113,102 +113,101 @@ async def variable(var):
 
 
 
-@javes.on(admin_cmd(pattern=f"(set|get|del) var(?: |$)(.*)(?: |$)([\s\S]*)", allow_sudo=True))
+@javes.on(admin_cmd(pattern='(set|get|del) var(?: |$)(.*)(?: |$)([\\s\\S]*)', allow_sudo=True))
 async def variable(var):
-  try:
-     Heroku = heroku3.from_key(HEROKU_API_KEY)                         
-     app = Heroku.app(HEROKU_APP_NAME)
-  except:
-  	return await var.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
-  if not FULL_SUDO:
-      await var.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**") 
-  else:
-    """
+    try:
+       Heroku = heroku3.from_key(HEROKU_API_KEY)                         
+       app = Heroku.app(HEROKU_APP_NAME)
+    except:
+    	return await var.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
+    if not FULL_SUDO:
+        await var.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**")
+    else:
+        """
         Manage most of ConfigVars setting, set new var, get current var,
         or delete var...
     """
-    if HEROKU_APP_NAME is not None:
-        app = Heroku.app(HEROKU_APP_NAME)
-    else:
-        return await var.edit("`[HEROKU]:"
-                              "\nPlease setup your` **HEROKU_APP_NAME**")
-    exe = var.pattern_match.group(1)
-    heroku_var = app.config()
-    if exe == "get":
-        rk = await var.reply("`Getting information...`")
-        await asyncio.sleep(1.5)
-        try:
-            val = var.pattern_match.group(2).split()[0]
-            if val in heroku_var:
-                return await rk.edit(                    
-                        "**Config Variable**:\n"
-                        f"`{val}`\n"
-                        "**Value**:\n"
-                        f"`{heroku_var[val]}`\n"
-                    )
-            else:
-                return await rk.edit("**Config vars**:"
-                                      f"\n\n`Error -> {val} not exists`")
-        except IndexError:
-            configs = prettyjson(heroku_var.to_dict(), indent=2)
-            with open("configs.json", "w") as fp:
-                fp.write(configs)
-            with open("configs.json", "r") as fp:
-                result = fp.read()
-                if len(result) >= 4096:
-                    await var.client.send_file(
-                        var.chat_id,
-                        "configs.json",
-                        reply_to=var.id,
-                        caption="`Output too large, sending it as a file`",
-                    )
-                else:
-                    await rk.edit("`[HEROKU]` variables:\n\n"
-                                   "================================"
-                                   f"\n```{result}```\n"
-                                   "================================"
-                                   )
-            os.remove("configs.json")
-            return
-    elif exe == "set":
-        rk = await var.reply("`Setting information...`")
-        val = var.pattern_match.group(2).split()
-        try:
-            val[1]
-        except IndexError:
-            return await rk.edit("`!set var <config name> <value>`")
-        await asyncio.sleep(1.5)
-        if val[0] in heroku_var:
-            await rk.edit(
-                      "**Successfully changed **\n"
-                      "**Var**:\n"
-                    f"`{val[0]}`\n"
-                    "**Value**:\n"
-                    f"`{val[1]}`\n"
-                    "**Restarting...**"
-                )            
+        if HEROKU_APP_NAME is not None:
+            app = Heroku.app(HEROKU_APP_NAME)
         else:
-            await rk.edit(
-                      "**Successfully added **\n"
-                      "**Var**:\n"
-                    f"`{val[0]}`\n"
-                    "**Value**:\n"
-                    f"`{val[1]}`\n"
-                    "**Restarting...**"
-                )            
-        heroku_var[val[0]] = val[1]
-    elif exe == "del":
-        rk = await var.reply("`Getting information to deleting vars...`")
-        try:
-            val = var.pattern_match.group(2).split()[0]
-        except IndexError:
-            return await rk.edit("`Please specify config vars you want to delete`")
-        await asyncio.sleep(1.5)
-        if val in heroku_var:
+            return await var.edit("`[HEROKU]:"
+                                  "\nPlease setup your` **HEROKU_APP_NAME**")
+        exe = var.pattern_match.group(1)
+        heroku_var = app.config()
+        if exe == "get":
+            rk = await var.reply("`Getting information...`")
+            await asyncio.sleep(1.5)
+            try:
+                val = var.pattern_match.group(2).split()[0]
+                if val in heroku_var:
+                    return await rk.edit(                    
+                            "**Config Variable**:\n"
+                            f"`{val}`\n"
+                            "**Value**:\n"
+                            f"`{heroku_var[val]}`\n"
+                        )
+                else:
+                    return await rk.edit("**Config vars**:"
+                                          f"\n\n`Error -> {val} not exists`")
+            except IndexError:
+                configs = prettyjson(heroku_var.to_dict(), indent=2)
+                with open("configs.json", "w") as fp:
+                    fp.write(configs)
+                with open("configs.json", "r") as fp:
+                    result = fp.read()
+                    if len(result) >= 4096:
+                        await var.client.send_file(
+                            var.chat_id,
+                            "configs.json",
+                            reply_to=var.id,
+                            caption="`Output too large, sending it as a file`",
+                        )
+                    else:
+                        await rk.edit("`[HEROKU]` variables:\n\n"
+                                       "================================"
+                                       f"\n```{result}```\n"
+                                       "================================"
+                                       )
+                os.remove("configs.json")
+                return
+        elif exe == "set":
+            rk = await var.reply("`Setting information...`")
+            val = var.pattern_match.group(2).split()
+            try:
+                val[1]
+            except IndexError:
+                return await rk.edit("`!set var <config name> <value>`")
+            await asyncio.sleep(1.5)
+            if val[0] in heroku_var:
+                await rk.edit(
+                          "**Successfully changed **\n"
+                          "**Var**:\n"
+                        f"`{val[0]}`\n"
+                        "**Value**:\n"
+                        f"`{val[1]}`\n"
+                        "**Restarting...**"
+                    )            
+            else:
+                await rk.edit(
+                          "**Successfully added **\n"
+                          "**Var**:\n"
+                        f"`{val[0]}`\n"
+                        "**Value**:\n"
+                        f"`{val[1]}`\n"
+                        "**Restarting...**"
+                    )            
+            heroku_var[val[0]] = val[1]
+        elif exe == "del":
+            rk = await var.reply("`Getting information to deleting vars...`")
+            try:
+                val = var.pattern_match.group(2).split()[0]
+            except IndexError:
+                return await rk.edit("`Please specify config vars you want to delete`")
+            await asyncio.sleep(1.5)
+            if val not in heroku_var:
+                return await rk.edit(f"**{val}**  `is not exists`")
             await rk.edit(f"**{val}**  `successfully deleted`\n Restarting......")
             del heroku_var[val]
-        else:
-            return await rk.edit(f"**{val}**  `is not exists`")
 
 
 
@@ -419,18 +418,18 @@ async def _(dyno):
         
 
 
-@javes.on(admin_cmd(pattern=f"shutdown$", allow_sudo=True))
+@javes.on(admin_cmd(pattern='shutdown$', allow_sudo=True))
 async def _(dyno):        
-  try:
-             Heroku = heroku3.from_key(HEROKU_API_KEY)                         
-             app = Heroku.app(HEROKU_APP_NAME)
-  except:
-  	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
-  if not FULL_SUDO:
-      await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**") 
-  else:  	  
+    try:
+               Heroku = heroku3.from_key(HEROKU_API_KEY)                         
+               app = Heroku.app(HEROKU_APP_NAME)
+    except:
+    	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
+    if not FULL_SUDO:
+        await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**")
+    else:  	  
         app.scale_formation_process("worker", 0)
-        text = f"`Turning Off Dynos` "
+        text = '`Turning Off Dynos` '
         sleep = 1
         dot = "."
         while (sleep <= 3):
@@ -438,7 +437,7 @@ async def _(dyno):
             await asyncio.sleep(1)
             dot += "."
             sleep += 1
-        await dyno.respond(f"turned off...`")
+        await dyno.respond('turned off...`')
         return await dyno.delete()        
         
         
@@ -466,28 +465,28 @@ async def _(dyno):
 
 
 
-@javes.on(admin_cmd(pattern=f"logs$", allow_sudo=True))
+@javes.on(admin_cmd(pattern='logs$', allow_sudo=True))
 async def _(dyno):        
-  try:
-             Heroku = heroku3.from_key(HEROKU_API_KEY)                         
-             app = Heroku.app(HEROKU_APP_NAME)
-  except:
-  	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
-  if not FULL_SUDO:
-      await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**") 
-  else:        
-        rk = await dyno.reply("`Getting Logs....`")
-        with open('logs.txt', 'w') as log:
-            log.write(app.get_log())
-        await dyno.client.send_file(
-            dyno.chat_id,
-            "logs.txt",
-            reply_to=dyno.id,
-            caption="`logs of 100+ lines`",
-        )
-        rk = await rk.edit("`Sending.......`")
-        await asyncio.sleep(5)
-        return os.remove('logs.txt')
+    try:
+               Heroku = heroku3.from_key(HEROKU_API_KEY)                         
+               app = Heroku.app(HEROKU_APP_NAME)
+    except:
+    	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
+    if not FULL_SUDO:
+        await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**") 
+    else:        
+          rk = await dyno.reply("`Getting Logs....`")
+          with open('logs.txt', 'w') as log:
+              log.write(app.get_log())
+          await dyno.client.send_file(
+              dyno.chat_id,
+              "logs.txt",
+              reply_to=dyno.id,
+              caption="`logs of 100+ lines`",
+          )
+          rk = await rk.edit("`Sending.......`")
+          await asyncio.sleep(5)
+          return os.remove('logs.txt')
 
 @javes05(outgoing=True, pattern="^\!restart$")
 async def _(dyno):        
@@ -522,22 +521,22 @@ async def _(dyno):
             return await dyno.delete()
             
 
-@javes.on(admin_cmd(pattern=f"restart$", allow_sudo=True))
+@javes.on(admin_cmd(pattern='restart$', allow_sudo=True))
 async def _(dyno):        
-  try:
-             Heroku = heroku3.from_key(HEROKU_API_KEY)                         
-             app = Heroku.app(HEROKU_APP_NAME)
-  except:
-  	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
-  if not FULL_SUDO:
-      await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**") 
-  else:                
+    try:
+               Heroku = heroku3.from_key(HEROKU_API_KEY)                         
+               app = Heroku.app(HEROKU_APP_NAME)
+    except:
+    	       return await dyno.reply(" `Please make sure your Heroku API Key, Your App name are configured correctly in the heroku var` please check https://telegra.ph/RkPavi-06-09-6")
+    if not FULL_SUDO:
+        await dyno.reply(f"`{JAVES_NNAME}:` **Sorry , Normal Sudo cant acess this comand,  active advance sudo by set  FULL_SUDO as true in heroku var**")
+    else:            
         try:           
             Dyno = app.dynos()[0]
         except IndexError:
             return await dyno.respond(f"**{HEROKU_APP_NAME}** `is not on...`")
         else:
-            text = f"`Restarting Dynos....`"
+            text = '`Restarting Dynos....`'
             Dyno.restart()
             sleep = 1
             dot = "."

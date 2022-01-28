@@ -148,13 +148,14 @@ last_triggered_rkfilters = {}  # pylint:disable=E0602
 async def on_snip(event):
     global last_triggered_rkfilters
     name = event.raw_text
-    if event.chat_id in last_triggered_rkfilters:
-        if name in last_triggered_rkfilters[event.chat_id]:
-            # avoid userbot spam
-            # "I demand rights for us bots, we are equal to you humans." -Henri Koivuneva (t.me/UserbotTesting/2698)
-            return False
-    snips = get_all_rkfilters(event.chat_id)
-    if snips:
+    if (
+        event.chat_id in last_triggered_rkfilters
+        and name in last_triggered_rkfilters[event.chat_id]
+    ):
+        # avoid userbot spam
+        # "I demand rights for us bots, we are equal to you humans." -Henri Koivuneva (t.me/UserbotTesting/2698)
+        return False
+    if snips := get_all_rkfilters(event.chat_id):
         for snip in snips:
             pattern = r"( |^|[^\w])" + re.escape(snip.keyword) + r"( |$|[^\w])"
             if re.search(pattern, name, flags=re.IGNORECASE):
@@ -172,9 +173,7 @@ async def on_snip(event):
                     )
                 else:
                     media = None
-                message_id = event.message.id
-                if event.reply_to_msg_id:
-                    message_id = event.reply_to_msg_id
+                message_id = event.reply_to_msg_id or event.message.id
                 await event.reply(
                     snip.reply,
                     file=media
@@ -201,13 +200,13 @@ async def filter_incoming_handler(handler):
             if not filters:
                 return
             for trigger in filters:
-                pro = fullmatch(trigger.keyword, name, flags=IGNORECASE)
-                if pro and trigger.f_mesg_id:
-                    msg_o = await handler.client.get_messages(
-                        entity=BOTLOG_CHATID, ids=int(trigger.f_mesg_id))
-                    await handler.reply(msg_o.message, file=msg_o.media)
-                elif pro and trigger.reply:
-                    await handler.reply(trigger.reply)
+                if pro := fullmatch(trigger.keyword, name, flags=IGNORECASE):
+                    if trigger.f_mesg_id:
+                        msg_o = await handler.client.get_messages(
+                            entity=BOTLOG_CHATID, ids=int(trigger.f_mesg_id))
+                        await handler.reply(msg_o.message, file=msg_o.media)
+                    elif trigger.reply:
+                        await handler.reply(trigger.reply)
     except AttributeError:
         pass
 
@@ -234,7 +233,7 @@ async def useridgetter(target):
             name, user_id))
 
 
-@javes.on(rekcah05(pattern=f"userid$", allow_sudo=True))
+@javes.on(rekcah05(pattern='userid$', allow_sudo=True))
 async def useridgetter(target):
     """ For .userid command, returns the ID of the target user. """
     message = await target.get_reply_message()
@@ -270,7 +269,7 @@ async def permalink(mention):
         await mention.edit(f"`{JAVES_NNAME}`: [{tag}](tg://user?id={user.id})")
 
 
-@javes.on(rekcah05(pattern=f"link(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='link(?: |$)(.*)', allow_sudo=True))
 async def permalink(mention):
     """ For .link command, generates a link to the user's PM with a custom text. """
     user, custom = await get_user_from_event(mention)
@@ -291,7 +290,7 @@ async def chatidgetter(chat):
     await chat.edit(f"`{JAVES_NNAME}`: Chat ID: `" + str(chat.chat_id) + "`")
 
 
-@javes.on(rekcah05(pattern=f"chatid$", allow_sudo=True))
+@javes.on(rekcah05(pattern='chatid$', allow_sudo=True))
 async def chatidgetter(chat):
     """ For .chatid, returns the ID of the chat you are in at that moment. """
     await chat.reply(f"`{JAVES_NNAME}`: Chat ID: `" + str(chat.chat_id) + "`")
@@ -319,7 +318,7 @@ async def log(log_text):
     await sleep(2)
     await log_text.delete()
 
-@javes.on(rekcah05(pattern=f"log$", allow_sudo=True))
+@javes.on(rekcah05(pattern='log$', allow_sudo=True))
 async def iqless(e):
     await e.reply(f"`{JAVES_NNAME}`: **Privacy error! , Sorry sudo users dont have permission to access it!**")
 
@@ -334,7 +333,7 @@ async def kickme(leave):
     await leave.edit(f"`{JAVES_NNAME}`: **My master Didnt like this place......GoodBye!**")
     await leave.client.kick_participant(leave.chat_id, 'me')
 
-@javes.on(rekcah05(pattern=f"kickme$", allow_sudo=True))
+@javes.on(rekcah05(pattern='kickme$', allow_sudo=True))
 async def iqless(e):
     await e.reply(f"`{JAVES_NNAME}`: **Privacy error! , Sorry sudo users dont have permission to access it!**")
 
@@ -420,7 +419,7 @@ async def rm_deletedacc(show):
             \nCHAT: {show.chat.title}(`{show.chat_id}`)")
 
 
-@javes.on(rekcah05(pattern=f"delusers(?: |$)(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='delusers(?: |$)(.*)', allow_sudo=True))
 async def rm_deletedacc(show):
     """ For .delusers command, list all the ghost/deleted accounts in a chat. """
     if not show.is_group:
@@ -497,7 +496,7 @@ async def rm_deletedacc(show):
 async def get_admin(show):
     """ For .admins command, list all of the admins of the chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = f'<b>Admins in {title}:</b> \n'
     try:
         async for user in show.client.iter_participants(
@@ -515,9 +514,8 @@ async def get_admin(show):
     except MessageTooLongError:
         await show.edit(
             f"`{JAVES_NNAME}`: **Too many admins here. Uploading admin list as file**")
-        file = open("adminlist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("adminlist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "adminlist.txt",
@@ -527,11 +525,11 @@ async def get_admin(show):
         remove("adminlist.txt")
 
 
-@javes.on(rekcah05(pattern=f"admins$", allow_sudo=True))
+@javes.on(rekcah05(pattern='admins$', allow_sudo=True))
 async def get_admin(show):
     """ For .admins command, list all of the admins of the chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = f'<b>Admins in {title}:</b> \n'
     try:
         async for user in show.client.iter_participants(
@@ -549,9 +547,8 @@ async def get_admin(show):
     except MessageTooLongError:
         await show.reply(
             f"`{JAVES_NNAME}`: **Too many admins here. Uploading admin list as file**")
-        file = open("adminlist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("adminlist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "adminlist.txt",
@@ -567,7 +564,7 @@ async def get_admin(show):
 async def get_bots(show):
     """ For .bots command, list all of the bots of the chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = f'<b>Bots in {title}:</b>\n'
     try:
         if isinstance(show.to_id, PeerChat):
@@ -589,9 +586,8 @@ async def get_bots(show):
     except MessageTooLongError:
         await show.edit(
             f"`{JAVES_NNAME}`: ** Too many bots here. Uploading bots list as file.**")
-        file = open("botlist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("botlist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "botlist.txt",
@@ -600,11 +596,11 @@ async def get_bots(show):
         )
         remove("botlist.txt")
 
-@javes.on(rekcah05(pattern=f"bots$", allow_sudo=True))
+@javes.on(rekcah05(pattern='bots$', allow_sudo=True))
 async def get_bots(show):
     """ For .bots command, list all of the bots of the chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = f'<b>Bots in {title}:</b>\n'
     try:
         if isinstance(show.to_id, PeerChat):
@@ -626,9 +622,8 @@ async def get_bots(show):
     except MessageTooLongError:
         await show.reply(
             f"`{JAVES_NNAME}`: ** Too many bots here. Uploading bots list as file.**")
-        file = open("botlist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("botlist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "botlist.txt",
@@ -652,7 +647,7 @@ async def get_bots(show):
 async def get_users(show):
     """ For .users command, list all of the users in a chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = 'Users in {}: \n'.format(title)
     try:
         if not show.pattern_match.group(1):
@@ -676,9 +671,8 @@ async def get_users(show):
     except MessageTooLongError:
         await show.edit(
             f"`{JAVES_NNAME}`: ** This is a huge group. Uploading users lists as file.")
-        file = open("userslist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("userslist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "userslist.txt",
@@ -692,7 +686,7 @@ async def get_user_from_event(event):
     """ Get the user from argument or replied message. """
     args = event.pattern_match.group(1).split(':', 1)
     extra = None
-    if event.reply_to_msg_id and not len(args) == 2:
+    if event.reply_to_msg_id and len(args) != 2:
         previous_message = await event.get_reply_message()
         user_obj = await event.client.get_entity(previous_message.from_id)
         extra = event.pattern_match.group(1)
@@ -738,11 +732,11 @@ async def get_user_from_id(user, event):
     return user_obj
 
 
-@javes.on(rekcah05(pattern=f"users ?(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='users ?(.*)', allow_sudo=True))
 async def get_users(show):
     """ For .users command, list all of the users in a chat. """
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
+    title = info.title or "this chat"
     mentions = 'Users in {}: \n'.format(title)
     try:
         if not show.pattern_match.group(1):
@@ -766,9 +760,8 @@ async def get_users(show):
     except MessageTooLongError:
         await show.reply(
             f"`{JAVES_NNAME}`: ** This is a huge group. Uploading users lists as file.")
-        file = open("userslist.txt", "w+")
-        file.write(mentions)
-        file.close()
+        with open("userslist.txt", "w+") as file:
+            file.write(mentions)
         await show.client.send_file(
             show.chat_id,
             "userslist.txt",
@@ -782,7 +775,7 @@ async def get_user_from_event(event):
     """ Get the user from argument or replied message. """
     args = event.pattern_match.group(1).split(':', 1)
     extra = None
-    if event.reply_to_msg_id and not len(args) == 2:
+    if event.reply_to_msg_id and len(args) != 2:
         previous_message = await event.get_reply_message()
         user_obj = await event.client.get_entity(previous_message.from_id)
         extra = event.pattern_match.group(1)
@@ -875,7 +868,7 @@ async def add_new_filter(new_handler):
 
 
 
-@javes.on(rekcah05(pattern=f"savefilter2 (\w*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='savefilter2 (\\w*)', allow_sudo=True))
 async def add_new_filter(new_handler):
     """ For .filter command, allows adding new filters in a chat """
     try:
@@ -937,7 +930,7 @@ async def remove_a_filter(r_handler):
             "`Filter` **{}** `was deleted successfully`".format(filt))
 
 
-@javes.on(rekcah05(pattern=f"clearfilter2 ?(.*)", allow_sudo=True))
+@javes.on(rekcah05(pattern='clearfilter2 ?(.*)', allow_sudo=True))
 async def remove_a_filter(r_handler):
     """ For .stop command, allows you to remove a filter from a chat. """
     try:
@@ -967,14 +960,11 @@ async def filters_active(event):
     for filt in filters:
         if transact == "`There are no filters in this chat.`":
             transact = "Active filters in this chat:\n"
-            transact += "`{}`\n".format(filt.keyword)
-        else:
-            transact += "`{}`\n".format(filt.keyword)
-
+        transact += "`{}`\n".format(filt.keyword)
     await event.edit(transact)
 
 
-@javes.on(rekcah05(pattern=f"checkfilter2$", allow_sudo=True))
+@javes.on(rekcah05(pattern='checkfilter2$', allow_sudo=True))
 async def filters_active(event):
     """ For .filters command, lists all of the active filters in a chat. """
     try:
@@ -987,10 +977,7 @@ async def filters_active(event):
     for filt in filters:
         if transact == "`There are no filters in this chat.`":
             transact = "Active filters in this chat:\n"
-            transact += "`{}`\n".format(filt.keyword)
-        else:
-            transact += "`{}`\n".format(filt.keyword)
-
+        transact += "`{}`\n".format(filt.keyword)
     await event.reply(transact)
 
 

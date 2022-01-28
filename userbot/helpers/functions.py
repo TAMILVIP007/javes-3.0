@@ -61,10 +61,10 @@ async def yt_search(cat):
         html = urllib.request.urlopen(
             "https://www.youtube.com/results?search_query=" + cat
         )
-        user_data = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-        video_link = None
-        if user_data:
+        if user_data := re.findall(r"watch\?v=(\S{11})", html.read().decode()):
             video_link = "https://www.youtube.com/watch?v=" + user_data[0]
+        else:
+            video_link = None
         if video_link:
             return video_link
         return "Couldnt fetch results"

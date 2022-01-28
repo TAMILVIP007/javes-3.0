@@ -47,7 +47,7 @@ async def teamdc(event):
     if atul:
         font_choice = atul
         dctxt = shivam
-        if atul not in DC_FONT_STYLE:
+        if font_choice not in DC_FONT_STYLE:
             await event.edit("Please select a valid Font Style!")
             return
     else:
@@ -64,7 +64,7 @@ async def teamdc(event: events.InlineQuery.Event):
     if event.query.user_id == me.id:
         resultm = builder.article(title="Fonts",description="Available Fonts.",text="serif\nsans\nsans_i\nserif_i\nmedi_b\nmedi\ndouble\ncursive_b\ncursive\nbigsmall\nreverse\ncircle\ncircle_b\nmono\nsquare_b\nsquare\nsmoth\ngoth\nwide\nweb\nweeb\nweeeb\ntwist\ntwist_b\ntwist_c\n",buttons=[[Button.switch_inline("Search Again", query="sfonts  ", same_peer=True)],],)
         await event.answer([resultm])
-    if not event.query.user_id == me.id:
+    if event.query.user_id != me.id:
         resultm = builder.article(title="me not your bot",description="Mind Your Business",text="Hey U Must Use https://github.com/Sh1vam/javes-3.0  ",buttons=[[Button.switch_inline("Search Again", query="sfonts  ", same_peer=True)],], )
         await e.answer([resultm])
         return
@@ -88,7 +88,7 @@ async def teamdc(event: events.InlineQuery.Event):
         if atul:
             font_choice = atul
             dctxt = shivam
-            if atul not in DC_FONT_STYLE:
+            if font_choice not in DC_FONT_STYLE:
                 resultm = builder.article(title="Invalid Font Choosen",description="Give Some Correct input",text="Send .sfonts to see the available fonts.",buttons=[[Button.switch_inline("Search Again", query="fstyle ", same_peer=True)],],)
                 await event.answer([resultm])
                 return
@@ -99,7 +99,7 @@ async def teamdc(event: events.InlineQuery.Event):
         danish = await dc_font_maker(dcfontchoice, dctxt)
         result = builder.article(title=shivam,description=dcfontchoice,text=f"{danish}",buttons=[[Button.switch_inline("Search Again", query="fstyle ", same_peer=True)],],)
         await event.answer([result])
-    if not event.query.user_id == me.id:
+    if event.query.user_id != me.id:
         resultm = builder.article(title="me not your bot",description="Mind Your Business",text="Hey U Must Use https://github.com/Sh1vam/javes-3.0  ",buttons=[[Button.switch_inline("Search Again", query="fstyle ", same_peer=True)],], )
         await event.answer([resultm])
         return

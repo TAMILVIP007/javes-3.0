@@ -125,7 +125,7 @@ if Var.TG_BOT_USER_NAME_BF_HER is not None and tgbot is not None:
     )
     async def on_plug_in_callback_query_handler(event):
         me = await client.get_me()
-        if not event.query.user_id == me.id:
+        if event.query.user_id != me.id:
             atul= "Please get your own Userbot😁😁"
             await event.answer(atul)
             return
@@ -134,9 +134,7 @@ if Var.TG_BOT_USER_NAME_BF_HER is not None and tgbot is not None:
         shivam_sh1vam="{}".format(plugin_name)
         help_string = "Commands found in {}:\n".format(plugin_name)
         k = "💠🔮💎"
-        u = 0
-        for i in CMD_HELP[plugin_name]:
-            u += 1
+        for u, i in enumerate(CMD_HELP[plugin_name], start=1):
             help_string += str(k[u % 3]) + " " + i + "\n\n"
         if plugin_name in CMD_HELP:
             help_string += (
@@ -225,10 +223,7 @@ def paginate_help(page_number, loaded_plugins, prefix):
     number_of_cols = int(os.environ.get("NO_OF_ROWS_TO_DESPLAY_IN_HELP",5))
     multi = os.environ.get("EMOJI_TO_DESPLAY_IN_HELP","🔥")
     mult2i = os.environ.get("EMOJI2_TO_DESPLAY_IN_HELP","💧")
-    helpable_plugins = []
-    for p in loaded_plugins:
-        if not p.startswith("_"):
-            helpable_plugins.append(p)
+    helpable_plugins = [p for p in loaded_plugins if not p.startswith("_")]
     helpable_plugins = sorted(helpable_plugins)
     modules = [custom.Button.inline(
         "{} {} {}".format(random.choice(list(multi)), x,random.choice(list(mult2i))),

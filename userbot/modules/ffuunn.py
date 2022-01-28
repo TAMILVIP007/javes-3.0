@@ -48,7 +48,7 @@ async def _(event):
     if event.fwd_from:
         return
     animation_interval = 0.1
-    animation_ttl = range(0, 36)
+    animation_ttl = range(36)
     # input_str = event.pattern_match.group(1)
     # if input_str == "nope":
     await event.edit(
@@ -619,10 +619,6 @@ async def _(event):
 
         return
 
-    animation_interval = 0.1
-
-    animation_ttl = range(0, 110)
-
     input_str = event.pattern_match.group(1)
 
     if input_str == "smoon":
@@ -640,6 +636,10 @@ async def _(event):
             "🌖🌖🌖🌖🌖\n🌒🌒🌒🌒🌒\n🌖🌖🌖🌖🌖\n🌒🌒🌒🌒🌒\n🌖🌖🌖🌖🌖",
         ]
 
+        animation_interval = 0.1
+
+        animation_ttl = range(110)
+
         for i in animation_ttl:
 
             await asyncio.sleep(animation_interval)
@@ -653,10 +653,6 @@ async def _(event):
     if event.fwd_from:
 
         return
-
-    animation_interval = 0.1
-
-    animation_ttl = range(0, 100)
 
     input_str = event.pattern_match.group(1)
 
@@ -698,6 +694,10 @@ async def _(event):
             "🌕",
             "🌖",
         ]
+
+        animation_interval = 0.1
+
+        animation_ttl = range(100)
 
         for i in animation_ttl:
 

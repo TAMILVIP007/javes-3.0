@@ -46,7 +46,7 @@ async def install(event):
     chat = PLUGIN_CHANNEL
     documentss = await bot.get_messages(chat, None , filter=InputMessagesFilterDocument)
     total = int(documentss.total)
-    total_doxx = range(0, total)
+    total_doxx = range(total)
     await event.delete()
     for ixo in total_doxx:
         mxo = documentss[ixo].id

@@ -235,19 +235,18 @@ async def gdrive_search_list(event):
     r"^\!gsetf https?://drive\.google\.com/drive/u/\d/folders/([-\w]{25,})",
     outgoing=True)
 async def download(set):
-    """For !gsetf command, allows you to set path"""
-    await set.edit("Processing ...")
-    input_str = set.pattern_match.group(1)
-    if input_str:
-        parent_id = input_str
-        await set.edit(
-            "Custom Folder ID set successfully. The next uploads will upload to {parent_id} till `!gdriveclear`"
-        )
-        await set.delete()
-    else:
-        await set.edit(
-            "Use `!gdrivesp <link to GDrive Folder>` to set the folder to upload new files to."
-        )
+  """For !gsetf command, allows you to set path"""
+  await set.edit("Processing ...")
+  if input_str := set.pattern_match.group(1):
+    parent_id = input_str
+    await set.edit(
+        "Custom Folder ID set successfully. The next uploads will upload to {parent_id} till `!gdriveclear`"
+    )
+    await set.delete()
+  else:
+    await set.edit(
+        "Use `!gdrivesp <link to GDrive Folder>` to set the folder to upload new files to."
+    )
 
 
 @register(pattern="^\!gsetclear$", outgoing=True)
@@ -273,10 +272,10 @@ async def show_current_gdrove_folder(event):
 
 # Get mime type and name of given file
 def file_ops(file_path):
-    mime_type = guess_type(file_path)[0]
-    mime_type = mime_type if mime_type else "text/plain"
-    file_name = file_path.split("/")[-1]
-    return file_name, mime_type
+  mime_type = guess_type(file_path)[0]
+  mime_type = mime_type or "text/plain"
+  file_name = file_path.split("/")[-1]
+  return file_name, mime_type
 
 
 async def create_token_file(token_file, event):
@@ -313,55 +312,53 @@ def authorize(token_file, storage):
 
 
 async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
-    # Create Google Drive service instance
-    drive_service = build("drive", "v2", http=http, cache_discovery=False)
-    # File body description
-    media_body = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
-    body = {
-        "title": file_name,
-        "description": "Uploaded using PaperplaneExtended Userbot",
-        "mimeType": mime_type,
-    }
-    if parent_id:
-        body["parents"] = [{"id": parent_id}]
-    # Permissions body description: anyone who has link can upload
-    # Other permissions can be found at https://developers.google.com/drive/v2/reference/permissions
-    permissions = {
-        "role": "reader",
-        "type": "anyone",
-        "value": None,
-        "withLink": True
-    }
-    # Insert a file
-    file = drive_service.files().insert(body=body, media_body=media_body)
-    response = None
-    display_message = ""
-    while response is None:
-        status, response = file.next_chunk()
-        await asyncio.sleep(1)
-        if status:
-            percentage = int(status.progress() * 100)
-            progress_str = "[{0}{1}] {2}%".format(
-                "".join(["█" for i in range(math.floor(percentage / 10))]),
-                "".join(["░"
-                         for i in range(10 - math.floor(percentage / 10))]),
-                round(percentage, 2))
-            current_message = f"Uploading to Google Drive\nFile Name: {file_name}\n{progress_str}"
-            if display_message != current_message:
-                try:
-                    await event.edit(current_message)
-                    display_message = current_message
-                except Exception as e:
-                    LOGS.info(str(e))
-                    pass
-    file_id = response.get("id")
-    # Insert new permissions
-    drive_service.permissions().insert(fileId=file_id,
-                                       body=permissions).execute()
-    # Define file instance and get url for download
-    file = drive_service.files().get(fileId=file_id).execute()
-    download_url = file.get("webContentLink")
-    return download_url
+  # Create Google Drive service instance
+  drive_service = build("drive", "v2", http=http, cache_discovery=False)
+  # File body description
+  media_body = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
+  body = {
+      "title": file_name,
+      "description": "Uploaded using PaperplaneExtended Userbot",
+      "mimeType": mime_type,
+  }
+  if parent_id:
+      body["parents"] = [{"id": parent_id}]
+  # Permissions body description: anyone who has link can upload
+  # Other permissions can be found at https://developers.google.com/drive/v2/reference/permissions
+  permissions = {
+      "role": "reader",
+      "type": "anyone",
+      "value": None,
+      "withLink": True
+  }
+  # Insert a file
+  file = drive_service.files().insert(body=body, media_body=media_body)
+  response = None
+  display_message = ""
+  while response is None:
+    status, response = file.next_chunk()
+    await asyncio.sleep(1)
+    if status:
+      percentage = int(status.progress() * 100)
+      progress_str = "[{0}{1}] {2}%".format(
+          "".join(["█" for _ in range(math.floor(percentage / 10))]),
+          "".join(["░" for _ in range(10 - math.floor(percentage / 10))]),
+          round(percentage, 2),
+      )
+      current_message = f"Uploading to Google Drive\nFile Name: {file_name}\n{progress_str}"
+      if display_message != current_message:
+        try:
+          await event.edit(current_message)
+          display_message = current_message
+        except Exception as e:
+          LOGS.info(str(e))
+  file_id = response.get("id")
+  # Insert new permissions
+  drive_service.permissions().insert(fileId=file_id,
+                                     body=permissions).execute()
+  # Define file instance and get url for download
+  file = drive_service.files().get(fileId=file_id).execute()
+  return file.get("webContentLink")
 
 
 async def create_directory(http, directory_name, parent_id):
@@ -411,61 +408,59 @@ async def DoTeskWithDir(http, input_directory, event, parent_id):
 
 
 async def gdrive_list_file_md(service, file_id):
-    try:
-        file = service.files().get(fileId=file_id).execute()
+  try:
+    file = service.files().get(fileId=file_id).execute()
         # LOGS.info(file)
-        file_meta_data = {}
-        file_meta_data["title"] = file["title"]
-        mimeType = file["mimeType"]
-        file_meta_data["createdDate"] = file["createdDate"]
-        if mimeType == G_DRIVE_DIR_MIME_TYPE:
-            # is a dir.
-            file_meta_data["mimeType"] = "directory"
-            file_meta_data["previewURL"] = file["alternateLink"]
-        else:
-            # is a file.
-            file_meta_data["mimeType"] = file["mimeType"]
-            file_meta_data["md5Checksum"] = file["md5Checksum"]
-            file_meta_data["fileSize"] = str(humanbytes(int(file["fileSize"])))
-            file_meta_data["quotaBytesUsed"] = str(
-                humanbytes(int(file["quotaBytesUsed"])))
-            file_meta_data["previewURL"] = file["downloadUrl"]
-        return json.dumps(file_meta_data, sort_keys=True, indent=4)
-    except Exception as e:
-        return str(e)
+    file_meta_data = {'title': file["title"]}
+    mimeType = file["mimeType"]
+    file_meta_data["createdDate"] = file["createdDate"]
+    if mimeType == G_DRIVE_DIR_MIME_TYPE:
+        # is a dir.
+        file_meta_data["mimeType"] = "directory"
+        file_meta_data["previewURL"] = file["alternateLink"]
+    else:
+        # is a file.
+        file_meta_data["mimeType"] = file["mimeType"]
+        file_meta_data["md5Checksum"] = file["md5Checksum"]
+        file_meta_data["fileSize"] = str(humanbytes(int(file["fileSize"])))
+        file_meta_data["quotaBytesUsed"] = str(
+            humanbytes(int(file["quotaBytesUsed"])))
+        file_meta_data["previewURL"] = file["downloadUrl"]
+    return json.dumps(file_meta_data, sort_keys=True, indent=4)
+  except Exception as e:
+      return str(e)
 
 
 async def gdrive_search(http, search_query):
-    if parent_id:
-        query = "'{}' in parents and (title contains '{}')".format(
-            parent_id, search_query)
-    else:
-        query = "title contains '{}'".format(search_query)
-    drive_service = build("drive", "v2", http=http, cache_discovery=False)
-    page_token = None
-    res = ""
-    while True:
-        try:
-            response = drive_service.files().list(
-                q=query,
-                spaces="drive",
-                fields="nextPageToken, items(id, title, mimeType)",
-                pageToken=page_token).execute()
-            for file in response.get("items", []):
-                file_title = file.get("title")
-                file_id = file.get("id")
-                if file.get("mimeType") == G_DRIVE_DIR_MIME_TYPE:
-                    res += f"`[FOLDER] {file_title}`\nhttps://drive.google.com/drive/folders/{file_id}\n\n"
-                else:
-                    res += f"`{file_title}`\nhttps://drive.google.com/uc?id={file_id}&export=download\n\n"
-            page_token = response.get("nextPageToken", None)
-            if page_token is None:
-                break
-        except Exception as e:
-            res += str(e)
-            break
-    msg = f"**Google Drive Query**:\n`{search_query}`\n\n**Results**\n\n{res}"
-    return msg
+  if parent_id:
+      query = "'{}' in parents and (title contains '{}')".format(
+          parent_id, search_query)
+  else:
+      query = "title contains '{}'".format(search_query)
+  drive_service = build("drive", "v2", http=http, cache_discovery=False)
+  page_token = None
+  res = ""
+  while True:
+      try:
+          response = drive_service.files().list(
+              q=query,
+              spaces="drive",
+              fields="nextPageToken, items(id, title, mimeType)",
+              pageToken=page_token).execute()
+          for file in response.get("items", []):
+              file_title = file.get("title")
+              file_id = file.get("id")
+              if file.get("mimeType") == G_DRIVE_DIR_MIME_TYPE:
+                  res += f"`[FOLDER] {file_title}`\nhttps://drive.google.com/drive/folders/{file_id}\n\n"
+              else:
+                  res += f"`{file_title}`\nhttps://drive.google.com/uc?id={file_id}&export=download\n\n"
+          page_token = response.get("nextPageToken", None)
+          if page_token is None:
+              break
+      except Exception as e:
+          res += str(e)
+          break
+  return f"**Google Drive Query**:\n`{search_query}`\n\n**Results**\n\n{res}"
 
 
 CMD_HELP.update({

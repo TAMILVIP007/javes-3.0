@@ -30,20 +30,16 @@ async def __(event):
         ratio = height/width
         new_height = int(new_width * ratio)
 
-        resized_image = image.resize((new_width,new_height))
-        
-        return(resized_image)
+        return image.resize((new_width,new_height))
 
     # convert each pixel to grayscale
     def grayify(image):
-        grayscale_image = image.convert("L")
-        return(grayscale_image)
+        return image.convert("L")
         
     # convert pixels to a string of ascii characters
     def pixels_to_ascii(image):
         pixels = image.getdata()
-        characters = "".join([ASCII_CHARS[pixel//25] for pixel in pixels])
-        return(characters)    
+        return "".join([ASCII_CHARS[pixel//25] for pixel in pixels])    
 
     def main(new_width=n):
         # attempt to open image from user-input
@@ -52,20 +48,19 @@ async def __(event):
             image = PIL.Image.open(d)
         except:
             pass
-      
+
         # convert image to ascii    
         new_image_data = pixels_to_ascii(grayify(resize_image(image)))
-        
+
         # format
-        pixel_count = len(new_image_data)  
+        pixel_count = len(new_image_data)
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] for index in range(0, pixel_count, new_width)])
 
         # save result to "ascii_image.txt"
         with open("ascii_image.txt", "w") as f:
             f.write(ascii_image)
-        s = open("ascii_image.txt", 'r')
-        c = s.read()
-        s.close()
+        with open("ascii_image.txt", 'r') as s:
+            c = s.read()
         pygments.highlight(f"{c}", Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=False), "ascii.png")
         imgs="ascii.png"
         shvm=PIL.Image.open(imgs)

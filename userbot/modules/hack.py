@@ -18,13 +18,13 @@ async def _(event):
 
     animation_interval = 0.7
 
-    animation_ttl = range(0, 11)
+    animation_ttl = range(11)
 
-    
+
     await event.edit("Installing..")
 
     animation_chars = [
-        
+
             "`Installing Files To Hacked Private Server...`",
             "`Target Selected.`",
             "`Installing... 0%\n▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ `",
@@ -37,7 +37,7 @@ async def _(event):
             "`Installing... 100%\n████████Installed██████████ `",
             "`Target files Uploading...\n\nDirecting To Remote  server to hack..`"
         ]
-  
+
     for i in animation_ttl:
 
         await asyncio.sleep(animation_interval)
@@ -47,7 +47,7 @@ async def _(event):
     await asyncio.sleep(2)
 
     animation_interval = 0.6
-    animation_ttl = range(0,14)
+    animation_ttl = range(14)
     await event.edit("Connecting nd getting combined token from my.telegram.org ")
     await asyncio.sleep(1)
     animation_chars = [
@@ -66,13 +66,13 @@ async def _(event):
             "`root@anon:~# ls\n\n  usr  ghost  codes  \n\nroot@aono:~# # So Let's Hack it ...\nroot@anon:~# touch setup.py\n\nsetup.py deployed ...\nAuto CMD deployed ...\n\nroot@anon:~# trap whoami\n\nwhoami=user\nboost_trap on force ...\nvictim detected in ghost ...\n\nAll Done!`",
             "root@anon:~# ls\n\n  usr  ghost  codes  \n\nroot@aono:~# # So Let's Hack it ...\nroot@anon:~# touch setup.py\n\nsetup.py deployed ...\nAuto CMD deployed ...\n\nroot@anon:~# trap whoami\n\nwhoami=user\nboost_trap on force ...\nvictim detected  in ghost ...\n\nAll Done!\nInstalling Token!\nToken=`DJ65gulO90P90nlkm65dRfc8I`",
          ]
-            
+
 
     for i in animation_ttl:
-         
+
         await asyncio.sleep(animation_interval)
         await event.edit(animation_chars[i % 14])
-    
+
     await asyncio.sleep(2)
 
     await event.edit("`starting telegram hack`")
@@ -105,7 +105,7 @@ async def _(event):
     await asyncio.sleep(2)
     await event.edit("`accoount hacked\n collecting all data\n converting data into pdf`")
     await asyncio.sleep(1)
-    h=(random.randrange(1,5)) 
+    h=(random.randrange(1,5))
     if h==1:
         await event.edit("`pdf created click link below to download data\n\n😂 Don't worry only i can open this 😎😎.. If u don't Believe try to download` 🙂\n\nhttps://drive.google.com/file/d/1EHJSkt64RZEw7a2h8xkRqZSv_4dWhB02/view?usp=sharing")
     if h==2:

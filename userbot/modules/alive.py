@@ -2,14 +2,13 @@ import platform
 import sys
 from telethon import version
 from userbot import (HEROKU_APP_NAME, HEROKU_API_KEY, CMD_HELP, BOTLOG, BOTLOG_CHATID, JAVES_NAME)
-from userbot.events import javes05, rekcah05 
+from userbot.events import javes05, rekcah05
 import os
 import asyncio
 from telethon import events
 import heroku3
 FULL_SUDO = os.environ.get("FULL_SUDO", None)
 from var import Var
-rksu = Var.SUDO_USERS
 from datetime import datetime
 from userbot import CMD_HELP, ALIVE_NAME, PM_MESSAGE, JAVES_NAME, JAVES_MSG, ORI_MSG, ALIVE_S_MESSAGE, ALIVE_E_MESSAGE, ALIVE_S_MSG, ALIVE_E_MSG
 client2 = client3 = None
@@ -32,29 +31,19 @@ S3_USER = os.environ.get("S3_USER", DEFAULTUSER)
 
 v = "0.0.0"
 
-if rksu:
- if FULL_SUDO:
-    sudork = 'Full access'
- else:
-    sudork = 'Normal access'
+if rksu := Var.SUDO_USERS:
+  sudork = 'Full access' if FULL_SUDO else 'Normal access'
 else:
-	sudork = 'NotSet'
+  sudork = 'NotSet'
 
 
-if SPAM_PROTECT:
-	ss = "True"
-else:
-	ss = "False"
-
+ss = "True" if SPAM_PROTECT else "False"
 try:
-   Heroku = heroku3.from_key(HEROKU_API_KEY)                         
-   app = Heroku.app(HEROKU_APP_NAME)
-   herokurk = 'connected'
+  Heroku = heroku3.from_key(HEROKU_API_KEY)                         
+  app = Heroku.app(HEROKU_APP_NAME)
+  herokurk = 'connected'
 except:
-	herokurk = '[Failed to connect](https://telegra.ph/RkPavi-06-09-6)'
-	pass
-
-
+  herokurk = '[Failed to connect](https://telegra.ph/RkPavi-06-09-6)'
 if BOTLOG_CHATID:
 	logrk = 'connected'
 else:
@@ -121,19 +110,19 @@ async def alive(alive):
 
 
 
-@bot.on(rekcah05(pattern=f"sudo$", allow_sudo=True))
-@bot.on(rekcah05(pattern=f"javes$", allow_sudo=True))
+@bot.on(rekcah05(pattern='sudo$', allow_sudo=True))
+@bot.on(rekcah05(pattern='javes$', allow_sudo=True))
 async def alive(alive):
-    await alive.reply(""
-                    f"**{ALIVE_S_MMSG}**\n\n"                     
-                    f" °  `{JAVES_NNAME}`: **{v}**\n"
-                    f" °  `Sudo Id:` ** {rksu} **\n"
-                    f" °  `Telethon`: ** {version.__version__} **\n"
-                    f" °  `Python` : ** {platform.python_version()} **\n"                                                                                     
-                    f" °  `Os:` ** Kali GNU/Linux Rolling x86_64   **\n"                                       
-                    f" °  `Heroku:` ** {herokurk} **\n"
-                    f" °  `LogChat:` ** {logrk} **\n"
-                    f" °  `Sudo:` ** {sudork} **\n"
-                    f" °  `SpamProtect:` ** {ss} **\n"                    
-                    f" °  `Uptime:` ** {str(datetime.now() - START_TIME).split('.')[0]} **\n\n"                                   
-                    f"**{ALIVE_E_MMSG}**")
+  await alive.reply(""
+                  f"**{ALIVE_S_MMSG}**\n\n"                     
+                  f" °  `{JAVES_NNAME}`: **{v}**\n"
+                  f" °  `Sudo Id:` ** {rksu} **\n"
+                  f" °  `Telethon`: ** {version.__version__} **\n"
+                  f" °  `Python` : ** {platform.python_version()} **\n"                                                                                     
+                  f" °  `Os:` ** Kali GNU/Linux Rolling x86_64   **\n"                                       
+                  f" °  `Heroku:` ** {herokurk} **\n"
+                  f" °  `LogChat:` ** {logrk} **\n"
+                  f" °  `Sudo:` ** {sudork} **\n"
+                  f" °  `SpamProtect:` ** {ss} **\n"                    
+                  f" °  `Uptime:` ** {str(datetime.now() - START_TIME).split('.')[0]} **\n\n"                                   
+                  f"**{ALIVE_E_MMSG}**")
